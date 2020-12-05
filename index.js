@@ -19,6 +19,8 @@ const defaultOptions = {
   destination: null,
   concurrency: 4,
   include: ["/"],
+  preloadLinksPath: null,
+  onlyPreloadLinks: false,
   userAgent: "ReactSnap",
   // 4 params below will be refactored to one: `puppeteer: {}`
   // https://github.com/stereobooster/react-snap/issues/120
@@ -92,6 +94,10 @@ const defaults = userOptions => {
   let exit = false;
   if (!options.include || !options.include.length) {
     console.log("🔥  include option should be an non-empty array");
+    exit = true;
+  }
+  if (options.preloadLinksPath && !options.preloadLinksPath.endsWith('.json')) {
+    console.log("🔥  preloadLinksPath option must be a json file path with an array of links");
     exit = true;
   }
   if (options.preloadResources) {

@@ -90,7 +90,7 @@ const enableLogging = opt => {
         route = response._request
           .headers()
           .referer.replace(`http://localhost:${options.port}`, "");
-      } catch (e) {}
+      } catch (e) { }
       console.log(
         `️️️⚠️  warning at ${route}: got ${response.status()} HTTP code for ${response.url()}`
       );
@@ -122,6 +122,28 @@ const getLinks = async opt => {
     Array.from(document.querySelectorAll("iframe")).map(iframe => iframe.src)
   );
   return anchors.concat(iframes);
+};
+
+/**
+ * @param {preloadLinksPath: string} opt
+ * @return {Promise<Array<string>>}
+ */
+const getJSONLinks = opt => {
+  return new Promise(resolve => {
+    const fs = require('fs');
+    const { preloadLinksPath } = opt;
+    let json = ``
+    let file = fs.createReadStream(preloadLinksPath)
+    file
+      .on('data', (data) => {
+        var d = Buffer.from(data).toString()
+        json += d
+      })
+      .on('end', () => {
+        json = JSON.parse(json)
+        resolve(json.list)
+      })
+  })
 };
 
 /**
@@ -167,6 +189,12 @@ const crawl = async opt => {
   // use Set instead
   const uniqueUrls = new Set();
   const sourcemapStore = {};
+  const onlyPreloadLinks = options.onlyPreloadLinks
+  const preloadLinksPath = options.preloadLinksPath
+  if (preloadLinksPath) {
+    const preLinks = await getJSONLinks({ preloadLinksPath })
+    preLinks.forEach(addToQueue)
+  }
 
   /**
    * @param {string} path
@@ -246,7 +274,7 @@ const crawl = async opt => {
           tracker.dispose();
         }
         if (options.waitFor) await page.waitFor(options.waitFor);
-        if (options.crawl) {
+        if (options.crawl && !onlyPreloadLinks) {
           const links = await getLinks({ page });
           links.forEach(addToQueue);
         }
