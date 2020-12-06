@@ -313,7 +313,7 @@ const inlineCss = async opt => {
   if (cssSize > twentyKb)
     console.log(
       `⚠️  warning: inlining CSS more than 20kb (${cssSize /
-        1024}kb, ${cssStrategy})`
+      1024}kb, ${cssStrategy})`
     );
 
   if (cssStrategy === "critical") {
@@ -651,6 +651,28 @@ const saveAsJpeg = ({ page, filePath, options, route }) => {
   return page.screenshot({ path: screenshotPath });
 };
 
+/**
+ * @param {preloadLinksPath: string} opt
+ * @return {Promise<Array<string>>}
+ */
+const getJSONLinks = opt => {
+  return new Promise(resolve => {
+    const fs = require('fs');
+    const { preloadLinksPath } = opt;
+    let json = ``
+    let file = fs.createReadStream(preloadLinksPath)
+    file
+      .on('data', (data) => {
+        var d = Buffer.from(data).toString()
+        json += d
+      })
+      .on('end', () => {
+        json = JSON.parse(json)
+        resolve(json.list)
+      })
+  })
+};
+
 const run = async (userOptions, { fs } = { fs: nativeFs }) => {
   let options;
   try {
@@ -702,11 +724,19 @@ const run = async (userOptions, { fs } = { fs: nativeFs }) => {
   const { http2PushManifest } = options;
   const http2PushManifestItems = {};
 
+  // preloadLinks;
+  // const preloadLinksPath = options.preloadLinksPath
+  // if (preloadLinksPath) {
+  //   const preLinks = await getJSONLinks({ preloadLinksPath })
+  //   preloadLinks = preLinks
+  // }
+
   await crawl({
     options,
     basePath,
     publicPath,
     sourceDir,
+    preloadLinks,
     beforeFetch: async ({ page, route }) => {
       const {
         preloadImages,

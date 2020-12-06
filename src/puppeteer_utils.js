@@ -156,6 +156,7 @@ const crawl = async opt => {
   const {
     options,
     basePath,
+    // preloadLinks,
     beforeFetch,
     afterFetch,
     onEnd,
@@ -189,12 +190,13 @@ const crawl = async opt => {
   // use Set instead
   const uniqueUrls = new Set();
   const sourcemapStore = {};
-  const onlyPreloadLinks = options.onlyPreloadLinks
-  const preloadLinksPath = options.preloadLinksPath
-  if (preloadLinksPath) {
-    const preLinks = await getJSONLinks({ preloadLinksPath })
-    preLinks.forEach(addToQueue)
-  }
+
+  // if (preloadLinks && preloadLinks.length > 0) {
+  //   uniqueUrls = new Set(preloadLinks)
+  //   let tmpList = Array.from(uniqueUrls)
+  //   queue = _(tmpList)
+  //   enqued = tmpList.length
+  // }
 
   /**
    * @param {string} path
@@ -221,6 +223,19 @@ const crawl = async opt => {
       }
     }
   };
+
+  const onlyPreloadLinks = options.onlyPreloadLinks
+  const preloadLinksPath = options.preloadLinksPath
+  if (preloadLinksPath) {
+    const preLinks = await getJSONLinks({ preloadLinksPath })
+    preLinks.forEach(newUrl => {
+      if (!uniqueUrls.has(newUrl)) {
+        uniqueUrls.add(newUrl);
+        enqued++;
+        queue.write(newUrl);
+      }
+    })
+  }
 
   const browser = await puppeteer.launch({
     headless: options.headless,
