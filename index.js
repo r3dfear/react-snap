@@ -724,7 +724,7 @@ const run = async (userOptions, { fs } = { fs: nativeFs }) => {
   const { http2PushManifest } = options;
   const http2PushManifestItems = {};
 
-  preloadLinks;
+  let preloadLinks;
   // const preloadLinksPath = options.preloadLinksPath
   // if (preloadLinksPath) {
   //   const preLinks = await getJSONLinks({ preloadLinksPath })
