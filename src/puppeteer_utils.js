@@ -274,7 +274,7 @@ const crawl = async opt => {
           options,
           route,
           onError: () => {
-            shuttingDown = true;
+            if (!options.puppeteerIgnoreHTTPSErrors) shuttingDown = true;
           },
           sourcemapStore
         });
@@ -301,7 +301,7 @@ const crawl = async opt => {
         if (!shuttingDown) {
           console.log(`🔥  error at ${route}`, e);
         }
-        shuttingDown = true;
+        if (!options.puppeteerIgnoreHTTPSErrors) shuttingDown = true;
       }
     } else {
       // this message creates a lot of noise
