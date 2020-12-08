@@ -229,7 +229,7 @@ const crawl = async opt => {
   if (preloadLinksPath) {
     const preLinks = await getJSONLinks({ preloadLinksPath })
     preLinks.forEach(link => {
-      let newUrl = `${basePath}/${link}`
+      let newUrl = `${basePath}/${link.split(' ').join('_').split('%').join('')}`
       if (!uniqueUrls.has(newUrl)) {
         uniqueUrls.add(newUrl);
         enqued++;
