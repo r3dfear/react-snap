@@ -190,6 +190,9 @@ const crawl = async opt => {
   // use Set instead
   const uniqueUrls = new Set();
   const sourcemapStore = {};
+  const destinationDir = path.normalize(
+    `${process.cwd()}/${options.destination}`
+  );
 
   // if (preloadLinks && preloadLinks.length > 0) {
   //   uniqueUrls = new Set(preloadLinks)
@@ -229,8 +232,12 @@ const crawl = async opt => {
   if (preloadLinksPath) {
     const preLinks = await getJSONLinks({ preloadLinksPath })
     preLinks.forEach(link => {
-      let newUrl = `${basePath}/${link.trim().split(' ').join('_').split('%').join('')}`
-      if (!uniqueUrls.has(newUrl)) {
+      let processedLink = link.trim().split(' ').join('_').split('%').join('')
+      let newUrl = `${basePath}/${processedLink}`
+      
+      let tmpPath = path.join(destinationDir, processedLink)
+      let skipFile = fs.existsSync(tmpPath);
+      if (!uniqueUrls.has(newUrl) && !skipFile) {
         uniqueUrls.add(newUrl);
         enqued++;
         queue.write(newUrl);
